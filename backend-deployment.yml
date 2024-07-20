@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: awesome-cats-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: awesome-cats-backend
+  template:
+    metadata:
+      labels:
+        app: awesome-cats-backend
+    spec:
+      containers:
+      - name: backend
+        image: gcr.io/engaged-droplet-426007-b5/awesome_cats_backend:latest
+        env:
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: PGHOST
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: PGUSER
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: PGDATABASE
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: PGPASSWORD
+        ports:
+          - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: awesome-cats-backend
+  ports:
+    - port: 80
+      targetPort: 3000
